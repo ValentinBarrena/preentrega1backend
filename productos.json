@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "title": "Nuevo Producto2",
+    "description": "Descripción del nuevo producto2",
+    "code": 588,
+    "price": 202,
+    "status": true,
+    "stock": 502,
+    "category": "Electrónica",
+    "thumbnails": [
+      "url1",
+      "url2"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Nuevo Producto2",
+    "description": "Descripción del nuevo producto2",
+    "code": 590,
+    "price": 202,
+    "status": true,
+    "stock": 502,
+    "category": "Electrónica",
+    "thumbnails": [
+      "url1",
+      "url2"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Nuevo Producto3",
+    "description": "Descripción del nuevo producto3",
+    "code": 650,
+    "price": 200,
+    "status": true,
+    "stock": 500,
+    "category": "Electrónica",
+    "thumbnails": [
+      "url1",
+      "url2"
+    ]
+  }
+]

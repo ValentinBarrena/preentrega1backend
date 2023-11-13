@@ -1,8 +1,10 @@
 import { Router } from 'express'
 import { products } from './products.routes.js'
+import fs from 'fs/promises'
 
 const router = Router()
-const carts = []
+const CARTS_FILE = 'carrito.json'
+let carts = []
 
 function generateCartId() {
     if (carts.length === 0) {
@@ -12,9 +14,31 @@ function generateCartId() {
     return lastCart.id + 1;
 }
 
+async function loadCarts() {
+    try {
+        const data = await fs.readFile(CARTS_FILE, 'utf-8');
+        carts = JSON.parse(data);
+        return carts;
+    } catch (error) {
+        console.error('Error reading carts file:', error);
+        return [];
+    }
+}
+
+async function saveCarts() {
+    try {
+        const jsonData = JSON.stringify(carts, null, 2);
+        await fs.writeFile(CARTS_FILE, jsonData, 'utf-8');
+    } catch (error) {
+        console.error('Error writing carts file:', error);
+    }
+}
+
+loadCarts()
+
 //ENDPOINTS
 
-router.get('/:cid', (req, res) => {
+router.get('/:cid', async (req, res) => {
     const cartId = parseInt(req.params.cid);
     const cart = carts.find((cart) => cart.id === cartId);
 
@@ -25,16 +49,18 @@ router.get('/:cid', (req, res) => {
     res.status(200).send(cart.products);
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const newCart = {
         id: generateCartId(),
         products: [],
     };
-    carts.push(newCart);
+    carts.push(newCart)
+    
+    await saveCarts()
     res.status(200).send(newCart);
 })
 
-router.post('/:cid/product/:pid', (req, res) => {
+router.post('/:cid/product/:pid', async (req, res) => {
     const cartId = parseInt(req.params.cid);
     const productId = parseInt(req.params.pid);
     const cart = carts.find((cart) => cart.id === cartId);
@@ -60,9 +86,8 @@ router.post('/:cid/product/:pid', (req, res) => {
         cart.products[productIndex].quantity++;
     }
 
+    await saveCarts()
     res.status(200).send(cart.products);
 })
-
-
 
 export default router

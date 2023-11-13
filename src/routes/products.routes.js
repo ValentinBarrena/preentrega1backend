@@ -1,7 +1,31 @@
 import { Router } from 'express'
+import fs from 'fs/promises'
 
 const router = Router()
-const products = []
+const PRODUCTS_FILE = 'productos.json'
+let products = []
+
+async function loadProducts() {
+    try {
+        const data = await fs.readFile(PRODUCTS_FILE, 'utf-8');
+        products = JSON.parse(data);
+    } catch (error) {
+        {
+            console.error('Error reading products file:', error);
+        }
+    }
+}
+
+async function saveProducts() {
+    try {
+        const jsonData = JSON.stringify(products, null, 2);
+        await fs.writeFile(PRODUCTS_FILE, jsonData, 'utf-8');
+    } catch (error) {
+        console.error('Error writing products file:', error);
+    }
+}
+
+loadProducts()
 
 function generateProductId() {
     if (products.length === 0) {
@@ -11,10 +35,10 @@ function generateProductId() {
     return lastProduct.id + 1;
 }
 
-//ENDPOINT
+//ENDPOINTS
 
-router.get('/', (req, res) => {
-    res.status(200).send({ data: products })
+router.get('/', async (req, res) => {;
+    res.status(200).send({ products });
 })
 
 router.get('/:pid', (req, res) => {
@@ -28,7 +52,7 @@ router.get('/:pid', (req, res) => {
     res.status(200).send({ product });
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const {
         title,
         description,
@@ -62,9 +86,12 @@ router.post('/', (req, res) => {
         thumbnails,
     }
     products.push(newProduct)
+
+    await saveProducts()
+    res.status(200).send({ newProduct })
 })
 
-router.put('/:pid', (req, res) => {
+router.put('/:pid', async (req, res) => {
     const productId = parseInt(req.params.pid);
     const productIndex = products.findIndex((product) => product.id === productId);
 
@@ -75,12 +102,13 @@ router.put('/:pid', (req, res) => {
     const updatedProduct = req.body;
     updatedProduct.id = productId;
 
-    products[productIndex] = updatedProduct;
+    products[productIndex] = updatedProduct
 
+    await saveProducts()
     res.status(200).send({updatedProduct});
 })
 
-router.delete('/:pid', (req, res) => {
+router.delete('/:pid', async (req, res) => {
     const productId = parseInt(req.params.pid);
     const productIndex = products.findIndex((product) => product.id === productId);
 
@@ -89,6 +117,8 @@ router.delete('/:pid', (req, res) => {
     }
 
     products.splice(productIndex, 1);
+
+    await saveProducts()
     res.status(200).send({ message: 'Product successfully removed' });
 })
 
